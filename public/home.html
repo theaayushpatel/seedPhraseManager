@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="App.css">z
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>My Crypto Wallets</h2>
+            <div class="buttons">
+                <button onclick="location.href='addWallet.html'">Add New Wallet</button>
+            </div>
+        </div>
+        <table id="walletsTable">
+            <thead>
+                <tr>
+                    <th>Wallet Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Wallets will be dynamically listed here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for Decryption -->
+    <div id="decryptionModal" class="modal">
+        <div class="modal-content">
+            <h3>Enter Decryption Password</h3>
+            <input type="password" id="decryptionPassword" placeholder="Password">
+            <button onclick="decryptAndShowSeedPhrase()">Decrypt</button>
+            <button onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Modal for Seed Phrase -->
+    <div id="seedPhraseModal" class="modal">
+        <div class="modal-content">
+            <h3>Your Seed Phrase</h3>
+            <textarea id="seedPhraseDisplay" readonly></textarea>
+            <button onclick="copySeedPhrase()">Copy</button>
+            <button onclick="closeSeedPhraseModal()">Close</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        let selectedWallet = null;
+
+        async function fetchWallets() {
+            try {
+                const response = await fetch('/api/wallets');
+                const wallets = await response.json();
+                const walletsTableBody = document.getElementById('walletsTable').querySelector('tbody');
+                walletsTableBody.innerHTML = '';
+                wallets.forEach(wallet => {
+                    const row = document.createElement('tr');
+                    const walletNameCell = document.createElement('td');
+                    walletNameCell.textContent = wallet.walletName;
+
+                    // Add click event to decrypt and show seed phrase
+                    walletNameCell.onclick = () => openModal(wallet);
+
+                    row.appendChild(walletNameCell);
+                    walletsTableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching wallets:', error);
+            }
+        }
+
+        function openModal(wallet) {
+            selectedWallet = wallet;
+            document.getElementById('decryptionModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('decryptionModal').style.display = 'none';
+            document.getElementById('decryptionPassword').value = '';
+        }
+
+        function decryptAndShowSeedPhrase() {
+            const password = document.getElementById('decryptionPassword').value;
+            if (password && selectedWallet) {
+                try {
+                    const decryptedSeedPhrase = decryptSeedPhrase(selectedWallet.encryptedSeedPhrase, password);
+                    showSeedPhraseModal(decryptedSeedPhrase);
+                } catch (error) {
+                    alert('Failed to decrypt seed phrase. Please check your password.');
+                }
+            }
+            closeModal();
+        }
+
+        function decryptSeedPhrase(encryptedSeedPhrase, password) {
+            const [ivHex, encrypted] = encryptedSeedPhrase.split(':');
+            const key = CryptoJS.SHA256(password); // Generate a 256-bit key from the password
+            const iv = CryptoJS.enc.Hex.parse(ivHex); // Parse IV from hex
+            const encryptedHexStr = CryptoJS.enc.Hex.parse(encrypted); // Parse encrypted data from hex
+            const encryptedBase64Str = CryptoJS.enc.Base64.stringify(encryptedHexStr); // Convert to Base64
+            const decrypted = CryptoJS.AES.decrypt(encryptedBase64Str, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+            return decrypted.toString(CryptoJS.enc.Utf8); // Convert decrypted data to UTF-8
+        }
+
+        function showSeedPhraseModal(seedPhrase) {
+            document.getElementById('seedPhraseDisplay').value = seedPhrase;
+            document.getElementById('seedPhraseModal').style.display = 'flex';
+        }
+
+        function closeSeedPhraseModal() {
+            document.getElementById('seedPhraseModal').style.display = 'none';
+        }
+
+        function copySeedPhrase() {
+            const seedPhrase = document.getElementById('seedPhraseDisplay');
+            seedPhrase.select();
+            document.execCommand('copy');
+            alert('Seed Phrase copied to clipboard!');
+        }
+
+        fetchWallets();
+    </script>
+</body>
+</html>
