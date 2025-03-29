@@ -26,7 +26,7 @@ mongoose.connect('mongodb://localhost:27017/seedPhraseManager')
 const userSchema = new mongoose.Schema({
     username: String,
     userId: String,
-    masterSeed: String
+    hashedMasterSeed: String
 });
 
 const walletSchema = new mongoose.Schema({
@@ -59,6 +59,43 @@ function authenticateToken(req, res, next) {
     });
 }
 
+// Helper function to hash the Master Seed Phrase
+function hashMasterSeed(masterSeed) {
+    return crypto.createHash('sha256').update(masterSeed).digest('hex');
+}
+
+// Register API Endpoint
+app.post('/register', async (req, res) => {
+    const { username } = req.body;
+
+    if (!username) {
+        return res.status(400).send('Username is required.');
+    }
+
+    try {
+        // Check if the username already exists
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).send('Username already exists.');
+        }
+
+        // Generate Master Seed Phrase and User ID
+        const masterSeed = generateMasterSeedPhrase();
+        const hashedMasterSeed = hashMasterSeed(masterSeed); // Hash the Master Seed Phrase
+        const userId = generateUserId();
+
+        // Save the user to the database
+        const newUser = new User({ username, userId, hashedMasterSeed });
+        await newUser.save();
+
+        // Return the Master Seed Phrase to the client
+        res.status(201).json({ message: 'User registered successfully!', masterSeed });
+    } catch (error) {
+        console.error('Error during registration:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // Login API Endpoint
 app.post('/login', async (req, res) => {
     const { masterSeed } = req.body;
@@ -69,8 +106,11 @@ app.post('/login', async (req, res) => {
     }
 
     try {
-        // Check if the master seed exists in the database
-        const user = await User.findOne({ masterSeed });
+        // Hash the provided Master Seed Phrase
+        const hashedMasterSeed = hashMasterSeed(masterSeed);
+
+        // Check if the hashed master seed exists in the database
+        const user = await User.findOne({ hashedMasterSeed });
         if (!user) {
             return res.status(401).send('Invalid master seed phrase.');
         }
@@ -84,7 +124,6 @@ app.post('/login', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-
 // Add Wallet API Endpoint
 app.post('/addWallet', authenticateToken, async (req, res) => {
     const { walletName, seedPhrase, encryptionPassword } = req.body;
