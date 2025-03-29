@@ -5,33 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Wallet</title>
     <link rel="stylesheet" href="App.css">
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('addWalletForm').addEventListener('submit', async function (event) {
-                event.preventDefault();
-        
-                const walletName = document.getElementById('walletName').value;
-                const seedPhrase = document.getElementById('seedPhrase').value;
-                const encryptionPassword = document.getElementById('encryptionPassword').value;
-        
-                try {
-                    const response = await fetch('/addWallet', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ walletName, seedPhrase, encryptionPassword }),
-                    });
-        
-                    const result = await response.text();
-                    alert(result);
-                } catch (error) {
-                    console.error('Error submitting form:', error);
-                    alert('Failed to add wallet.');
-                }
-            });
-        });
-    </script>
 </head>
 <body>
     <div class="container">
@@ -45,6 +18,60 @@
             <input type="password" id="encryptionPassword" name="encryptionPassword" required>
             <button type="submit">Add Wallet</button>
         </form>
+        <button onclick="location.href='/home.html'">Back</button>
     </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document
+                .getElementById("addWalletForm")
+                .addEventListener("submit", async function (event) {
+                    event.preventDefault();
+
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        alert("You are not logged in!");
+                        window.location.href = "login.html";
+                        return;
+                    }
+
+                    const walletName = document.getElementById("walletName").value;
+                    const seedPhrase = document.getElementById("seedPhrase").value;
+                    const encryptionPassword = document.getElementById("encryptionPassword").value;
+
+                    try {
+                        const response = await fetch("/addWallet", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${token}`,
+                            },
+                            body: JSON.stringify({
+                                walletName,
+                                seedPhrase,
+                                encryptionPassword,
+                            }),
+                        });
+
+                        if (response.ok) {
+                            const result = await response.text();
+                            alert(result);
+                            window.location.href = "home.html";
+                        } else {
+                            const errorMessage = await response.text();
+                            alert(`Failed to add wallet: ${errorMessage}`);
+                            window.location.href = "home.html";
+                        }
+                    } catch (error) {
+                        console.error("Error submitting form:", error);
+                        alert("Failed to add wallet.");
+                        window.location.href = "home.html";
+                    }
+                });
+        });
+    </script>
 </body>
 </html>

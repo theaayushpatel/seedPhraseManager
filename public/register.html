@@ -1,19 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register</title>
-    <link rel="stylesheet" href="App.css">
-</head>
-<body>
+    <link rel="stylesheet" href="App.css" />
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("registerForm")
+          .addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value;
+
+            try {
+              const response = await fetch("/register", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username }),
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                alert(
+                  "Registration successful! Your Master Seed Phrase has been generated."
+                );
+
+                // Display the Master Seed Phrase
+                document.getElementById("seedPhraseDisplay").textContent =
+                  data.masterSeed;
+
+                // Show the seed phrase container
+                document.getElementById("seedPhraseContainer").style.display =
+                  "block";
+              } else {
+                const errorMessage = await response.text();
+                alert(`Registration failed: ${errorMessage}`);
+              }
+            } catch (error) {
+              console.error("Error during registration:", error);
+              alert("An error occurred. Please try again.");
+            }
+          });
+      });
+
+      function copySeedPhrase() {
+        const seedPhrase =
+          document.getElementById("seedPhraseDisplay").textContent;
+        navigator.clipboard
+          .writeText(seedPhrase)
+          .then(() => {
+            alert("Seed Phrase copied to clipboard!");
+          })
+          .catch((err) => {
+            console.error("Failed to copy seed phrase:", err);
+          });
+      }
+
+      function downloadSeedPhrase() {
+        const seedPhrase =
+          document.getElementById("seedPhraseDisplay").textContent;
+        const blob = new Blob([seedPhrase], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "master_seed_phrase.txt";
+        link.click();
+      }
+    </script>
+  </head>
+  <body>
     <div class="container">
-        <h2>Register</h2>
-        <form id="registerForm">
-            <label for="masterSeed">Master Seed Phrase:</label>
-            <input type="text" id="masterSeed" name="masterSeed" required>
-            <button type="submit">Register</button>
-        </form>
+      <h2>Register</h2>
+      <form id="registerForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
+        <button type="submit">Register</button>
+      </form>
+      <button onclick="location.href='/'">Back</button>
+
+      <div id="seedPhraseContainer" style="display: none; margin-top: 20px">
+        <h3>Your Master Seed Phrase</h3>
+        <p id="seedPhraseDisplay" style="font-weight: bold"></p>
+        <button onclick="copySeedPhrase()">Copy Seed Phrase</button>
+        <button onclick="downloadSeedPhrase()">Download Seed Phrase</button>
+      </div>
     </div>
-</body>
+  </body>
 </html>

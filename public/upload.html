@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload to Blockchain</title>
+    <link rel="stylesheet" href="App.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Upload All Wallets to Blockchain</h2>
+        <form id="uploadForm">
+            <button type="submit">Upload All Wallets</button>
+        </form>
+        <button onclick="location.href='/home.html'">Back</button>
+    </div>
+
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            try {
+                // Retrieve the logged-in user's token from localStorage
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    alert("You are not logged in!");
+                    window.location.href = "login.html";
+                    return;
+                }
+
+                // Send the request to the backend to upload all wallets
+                const response = await fetch("/uploadToBlockchain", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`, // Pass the token for authentication
+                    },
+                });
+
+                if (response.ok) {
+                    const result = await response.text();
+                    alert(result);
+                } else {
+                    const errorMessage = await response.text();
+                    alert(`Failed to upload: ${errorMessage}`);
+                }
+            } catch (error) {
+                console.error("Error uploading to blockchain:", error);
+                alert("An error occurred. Please try again.");
+            }
+        });
+    </script>
+</body>
+</html>
