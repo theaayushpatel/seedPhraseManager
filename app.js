@@ -187,6 +187,87 @@ app.post('/register', async (req, res) => {
 
 
 
+// const infuraUrl = "https://sepolia.infura.io/v3/e35f6adf8daf42038e7f42872982efc8"; // Replace with your Infura Project ID
+// const web3 = new Web3(infuraUrl); // Correct Web3 initialization
+// const contractAddress = "YOUR_CONTRACT_ADDRESS"; // Replace with your deployed contract address
+// const contractABI = [
+//     {
+//         "inputs": [
+//             { "internalType": "string", "name": "masterSeed", "type": "string" },
+//             { "internalType": "string", "name": "data", "type": "string" }
+//         ],
+//         "name": "uploadData",
+//         "outputs": [],
+//         "stateMutability": "nonpayable",
+//         "type": "function"
+//     },
+//     {
+//         "inputs": [
+//             { "internalType": "string", "name": "masterSeed", "type": "string" }
+//         ],
+//         "name": "retrieveData",
+//         "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+//         "stateMutability": "view",
+//         "type": "function"
+//     }
+// ];
+// const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+// app.post("/uploadToBlockchain", authenticateToken, async (req, res) => {
+//     try {
+//         const userId = req.user.userId;
+
+//         const user = await User.findOne({ userId });
+//         if (!user) {
+//             return res.status(404).send("User not found.");
+//         }
+
+//         const wallets = await Wallet.find({ userId });
+
+//         const userData = JSON.stringify({
+//             username: user.username,
+//             userId: user.userId,
+//             wallets: wallets.map(wallet => ({
+//                 walletName: wallet.walletName,
+//                 encryptedSeedPhrase: wallet.encryptedSeedPhrase,
+//             })),
+//         });
+
+//         const accounts = await web3.eth.getAccounts();
+//         const receipt = await contract.methods.uploadData(user.masterSeed, userData).send({
+//             from: accounts[0],
+//             gas: 3000000,
+//         });
+
+//         console.log("Transaction receipt:", receipt);
+//         res.status(200).send("User data and wallets uploaded to blockchain successfully.");
+//     } catch (error) {
+//         console.error("Error uploading to blockchain:", error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// });
+
+// app.post("/retrieveFromBlockchain", authenticateToken, async (req, res) => {
+//     try {
+//         const userId = req.user.userId;
+
+//         const user = await User.findOne({ userId });
+//         if (!user) {
+//             return res.status(404).send("User not found.");
+//         }
+
+//         const userData = await contract.methods.retrieveData(user.masterSeed).call();
+//         if (!userData) {
+//             return res.status(404).send("No data found on the blockchain.");
+//         }
+
+//         const parsedData = JSON.parse(userData);
+//         res.status(200).json(parsedData);
+//     } catch (error) {
+//         console.error("Error retrieving from blockchain:", error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// });
 
 // Start the server
 app.listen(port, () => console.log(`Server running at http://localhost:${port}`));
