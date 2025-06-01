@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const path = require('path');
-// const Web3 = require("web3");
+const Web3 = require("web3");
 const fs = require('fs');
 
 const app = express();
