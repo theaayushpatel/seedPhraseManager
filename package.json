@@ -1,0 +1,28 @@
+{
+  "name": "seedphrasemanager",
+  "version": "1.0.0",
+  "description": "A seed phrase manager application built using the MEARN stack (MongoDB, Express.js, React, Node.js) that stores crypto wallet seed phrases locally on MongoDB in an encrypted format using the AES-256 algorithm. The application also allows users to upload the database to the Ethereum blockchain using Infura for long-term storage.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theaayushpatel/seedPhraseManager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/theaayushpatel/seedPhraseManager/issues"
+  },
+  "homepage": "https://github.com/theaayushpatel/seedPhraseManager#readme",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.15.1",
+    "web3": "^4.16.0"
+  }
+}
